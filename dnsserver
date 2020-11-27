@@ -1,0 +1,31 @@
+#!/usr/bin/python3
+import socket
+
+from dns.rdataclass import RdataClass
+from dns.rdatatype import RdataType
+from dns.rrset import RRset
+import dns.rdtypes.IN.A
+
+ADDR = '192.168.198.131'
+PORT = 40000
+
+if __name__ == '__main__':
+    sock = socket.socket(socket.AF_INET, socket.SOCK_DGRAM)
+    sock.bind((ADDR, PORT))
+
+    while True:
+        data = dns.query.receive_udp(sock)
+        msg = data[0]
+        src = data[2]
+
+        for q in msg.question:
+            if q.name.labels == (b'cs5700cdn', b'example', b'com', b''):
+                resp = dns.message.make_response(msg)
+
+                resp.flags |= dns.flags.RA
+                rr = RRset(name=q.name, rdclass=1, rdtype=1)
+                a = dns.rdtypes.IN.A.A(rdclass=RdataClass.IN, rdtype=RdataType.A, address='8.8.8.8')
+                rr.items[a] = None
+                resp.answer.append(rr)
+
+                dns.query.send_udp(sock, resp, src)
