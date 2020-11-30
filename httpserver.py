@@ -1,0 +1,23 @@
+from flask import Flask
+import requests
+from sample import html_file
+import cache
+
+origin_server_ip = '18.207.254.152'
+origin_server_port = 8080
+
+app = Flask(__name__)
+cache = cache.LRUCache(10000000)
+
+@app.route('/wiki/<name>')
+def test(name):
+    content = cache.get(name)
+    if  content != -1:
+        return content
+    else:
+        page_content = requests.get('http://{}:{}/wiki/{}'.format(origin_server_ip, origin_server_port, name)).content
+        cache.put(name, page_content)
+        return page_content
+
+if __name__ == '__main__':
+    app.run(host='0.0.0.0', port=8000)
