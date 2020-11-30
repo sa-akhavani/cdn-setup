@@ -1,6 +1,5 @@
 from flask import Flask
 import requests
-from sample import html_file
 import cache
 
 origin_server_ip = '18.207.254.152'
