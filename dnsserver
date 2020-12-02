@@ -4,10 +4,14 @@ import socket
 from dns.rdataclass import RdataClass
 from dns.rdatatype import RdataType
 from dns.rrset import RRset
+import dns.query
 import dns.rdtypes.IN.A
+import random
 
-ADDR = '192.168.198.131'
+ADDR = '192.168.0.16' # should be local ip
 PORT = 40000
+
+replica_server_list = ['13.231.206.182', '13.239.22.118', '34.248.209.79', '18.231.122.62', '3.101.37.125']
 
 if __name__ == '__main__':
     sock = socket.socket(socket.AF_INET, socket.SOCK_DGRAM)
@@ -24,7 +28,8 @@ if __name__ == '__main__':
 
                 resp.flags |= dns.flags.RA
                 rr = RRset(name=q.name, rdclass=1, rdtype=1)
-                a = dns.rdtypes.IN.A.A(rdclass=RdataClass.IN, rdtype=RdataType.A, address='8.8.8.8')
+                random_ip = random.choice(replica_server_list)
+                a = dns.rdtypes.IN.A.A(rdclass=RdataClass.IN, rdtype=RdataType.A, address=random_ip)
                 rr.items[a] = None
                 resp.answer.append(rr)
 
