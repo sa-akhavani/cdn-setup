@@ -1,27 +1,35 @@
-from collections import OrderedDict
-import sys
+import zlib
 
-# todo compress things in the cache
-
-class LRUCache:
+class Cache:
     # initialising capacity
-    def __init__(self, memory_limit: int):
-        self.cache = OrderedDict()
+    def __init__(self, memory_limit):
+        self.cache = dict()
         self.memory_limit_bytes = memory_limit
         self.used_memory = 0
 
-    def get(self, key: str):
+    # Compress string before putting them in the cache
+    def __compress(self, value):
+        compressed = zlib.compress(value.encode())
+        return compressed
+
+    # Decompress string before returning to caller
+    def __decompress(self, value):
+        original = zlib.decompress(value)
+        return original.decode()
+
+    # Get value of the key from cache
+    def get(self, key):
         if key not in self.cache:
             return -1
         else:
-            # self.cache.move_to_end(key)
-            return self.cache[key]
+            return self.__decompress(self.cache[key])
 
-    def put(self, key: str, value: str):
-        if self.used_memory + len(value) < self.memory_limit_bytes:
-            self.cache[key] = value
-            self.used_memory += len(value)
-            # self.cache.move_to_end(key)
+    # Put value for the key in cache
+    def put(self, key, value):
+        compressed = self.__compress(value)
+        if self.used_memory + len(compressed) < self.memory_limit_bytes:
+            self.cache[key] = compressed
+            self.used_memory += len(compressed)
             return 0
         else:
             print('reached memory limit')

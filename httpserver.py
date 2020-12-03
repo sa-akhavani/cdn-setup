@@ -8,7 +8,7 @@ origin_server_port = 8080
 cache_memory_limit = 10485760
 
 app = Flask(__name__)
-cache = cache.LRUCache(cache_memory_limit)
+cache = cache.Cache(cache_memory_limit)
 
 @app.route('/wiki/<name>')
 def test(name):
