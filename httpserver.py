@@ -4,7 +4,9 @@ from flask import Flask
 import requests
 import cache
 
-origin_server_ip = '18.207.254.152'
+# ec2-18-207-254-152.compute-1.amazonaws.com will be provided from the command line
+# should resolve to '18.207.254.152'
+origin_server_ip = None
 origin_server_port = 8080
 cache_memory_limit = 10485760
 
@@ -31,5 +33,5 @@ if __name__ == '__main__':
     parser.add_argument('-o', required=True, help='the name of the origin server for the CDN')
     args = parser.parse_args()
 
-    origin_server_ip = args.o  # TODO test that this works
+    origin_server_ip = args.o
     app.run(host='0.0.0.0', port=args.p)

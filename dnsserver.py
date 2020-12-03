@@ -50,7 +50,7 @@ def run(args: argparse.Namespace):
     domain_match = domain_cli2query(args.n)
 
     # debug statement so we don't miss this
-    if not ADDR != 'cs5700cdnproject.ccs.neu.edu':
+    if ADDR != 'cs5700cdnproject.ccs.neu.edu':
         print('Warning: We need to bind to cs5700cdnproject.ccs.neu.edu on the final submission')
 
     while True:

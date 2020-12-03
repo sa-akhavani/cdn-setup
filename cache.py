@@ -1,6 +1,13 @@
 import zlib
 
+
 class Cache:
+    """
+    Implements our cache, which maps wikipedia article names as strings to compressed HTML bodies for those articles
+
+    The cache also manages its own size and ensures that it never stores more data than it is allowed to.
+    """
+
     # initialising capacity
     def __init__(self, memory_limit):
         self.cache = dict()
@@ -9,8 +16,7 @@ class Cache:
 
     # Compress string before putting them in the cache
     def __compress(self, value):
-        compressed = zlib.compress(value.encode())
-        return compressed
+        return zlib.compress(value)
 
     # Decompress string before returning to caller
     def __decompress(self, value):
