@@ -3,7 +3,6 @@ import argparse
 from flask import Flask
 import requests
 import cache
-import csv
 
 # ec2-18-207-254-152.compute-1.amazonaws.com will be provided from the command line
 # should resolve to '18.207.254.152'
@@ -16,14 +15,8 @@ cache = cache.Cache(cache_memory_limit)
 
 
 def fillcache():
-    """Requests the most popular wikipedia pages from the origin server until the cache contains 10MB of data"""
-    with open('/course/cs5700f20/popular_pages_20201130.csv', 'r') as fp:
-        reader = csv.reader(fp)
-        for row in reader:
-            print(row[0].split('/'))
-
-            # TODO request page and add to cache (do this for the entire file)
-            # or maybe do knapsack solution with weight as article size and value as number of hits
+    """Fills the cache with the most popular pages by reading that data from a config file on the system"""
+    pass  # TODO
 
 
 @app.route('/wiki/<name>')
@@ -35,7 +28,6 @@ def test(name):
     else:
         print('cache miss')
         page_content = requests.get('http://{}:{}/wiki/{}'.format(origin_server_ip, origin_server_port, name)).content
-        cache.put(name, page_content)
         return page_content
 
 
