@@ -10,7 +10,7 @@ class Writer:
     server so that every caching http server can quickly fill their cache.
     """
     def __init__(self, fn):
-        self.fp = open(fn, 'wb')
+        self.fp = open(fn, 'w')
         self.output = []
 
     def write(self, article: str, body: bytes):
@@ -25,8 +25,7 @@ class Writer:
 
     def close(self):
         """Writes all the article/body pairs to the file and closes the file"""
-        slz = json.dumps(self.output, ensure_ascii=False).encode('utf-8')
-        self.fp.write(slz)
+        json.dump(self.output, self.fp)
         self.fp.close()
 
 

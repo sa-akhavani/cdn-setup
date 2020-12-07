@@ -20,7 +20,10 @@ def fillcache():
 
 
 @app.route('/wiki/<name>')
-def test(name):
+def servearticle(name):
+    """Serves requests for Wikipedia articles
+
+    name (str) the article title being requested"""
     content = cache.get(name)
     if content != -1:
         print('cache hit!')
@@ -29,6 +32,17 @@ def test(name):
         print('cache miss')
         page_content = requests.get('http://{}:{}/wiki/{}'.format(origin_server_ip, origin_server_port, name)).content
         return page_content
+
+    # TODO retroactively get the RTTs from the TCP connection
+
+
+@app.route('/msmt/<name>')
+def servemeasurement(name):
+    """Serves requests for TCP RTTs of a given client
+
+    name (str) the IP address of the client whose RTT with this server is being requested
+    """
+    pass  # TODO
 
 
 if __name__ == '__main__':

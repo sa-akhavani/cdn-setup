@@ -9,7 +9,7 @@ import dns.query
 import dns.rdtypes.IN.A
 import random
 
-ADDR = '192.168.0.16'  # should be local ip
+ADDR = 'cs5700cdnproject.ccs.neu.edu'
 
 replica_server_list = ['13.231.206.182', '13.239.22.118', '34.248.209.79', '18.231.122.62', '3.101.37.125']
 
@@ -72,6 +72,8 @@ def run(args: argparse.Namespace):
                 resp.answer.append(rr)
 
                 dns.query.send_udp(sock, resp, src)
+
+                # TODO send HTTP request for measurement data to replica server
 
 
 if __name__ == '__main__':
