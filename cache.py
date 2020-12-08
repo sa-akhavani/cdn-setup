@@ -21,11 +21,17 @@ class Cache:
         else:
             return zlib.decompress(self.cache[key])
 
-    def put(self, key, value):
+    def put(self, key, value, alreadycompressed=False):
         """Compresses the given value and puts it in the cache under the given key if there is room for it,
         returning -1 if there is not room"""
-        compressed = zlib.compress(value)
 
+        # handle case where we pre-compress the data for performance
+        if alreadycompressed:
+            compressed = value
+        else:
+            compressed = zlib.compress(value)
+
+        # store compressed content if there's room
         if self.used_memory + len(compressed) <= self.memory_limit_bytes:
             self.cache[key] = compressed
             self.used_memory += len(compressed)

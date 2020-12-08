@@ -23,4 +23,5 @@ if __name__ == '__main__':
     for obj in objlist:
         sz += len(obj['body'])
 
+    print(sz)
     print(sz < 10485760)
