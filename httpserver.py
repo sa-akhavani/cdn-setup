@@ -10,6 +10,7 @@ import cache
 # should resolve to '18.207.254.152'
 import fileifc
 
+local_port = None
 origin_server_ip = None
 origin_server_port = 8080
 cache_memory_limit = 10485760
@@ -35,10 +36,11 @@ def servearticle(name: str):
 
     name (str) the article title being requested
     """
-    # # get the output of doing one of these commands and use the rtt field to store measurement data for this client
-    # print(subprocess.check_output(['ss', '-it']).decode('utf-8'))
-    # print(subprocess.check_output(['ss', '-it', 'dst 192.168.198.131:40000']).decode('utf-8'))
-    # print(subprocess.check_output(['ss', '-it', 'src 192.168.198.131:40000']).decode('utf-8'))
+    # get the output of doing one of these commands and use the rtt field to store measurement data for this client
+    print(subprocess.check_output(['ss', '-it']).decode('utf-8'))
+    strout = subprocess.check_output(['ss', '-it', 'dport = :{}'.format(local_port)]).decode('utf-8')
+    strout.split()
+    print(subprocess.check_output(['ss', '-it', 'sport = :{}'.format(local_port)]).decode('utf-8'))
 
     content = cache.get(name)
     if content != -1:
@@ -66,4 +68,5 @@ if __name__ == '__main__':
     args = parser.parse_args()
 
     origin_server_ip = args.o
+    local_port = args.p
     app.run(host='0.0.0.0', port=args.p)

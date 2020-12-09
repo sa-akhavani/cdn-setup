@@ -13,8 +13,22 @@ ADDR = 'cs5700cdnproject.ccs.neu.edu'
 
 replica_server_list = ['13.231.206.182', '13.239.22.118', '34.248.209.79', '18.231.122.62', '3.101.37.125']
 
+"""
+---------DNS code
+receive request
+if src_ip in map:
+    redirect user to server with lowest latency
+else:
+    redirect to random server
+    map src_ip to a list of latencies with all servers' latencies = -1
+send request for measured latency to the server we just directed the client to
+receive that request in another thread and update latency in map
 
-def domain_cli2query(fromcmdline):
+note: all latencies are set to -1 to begin with so that we can measure to all servers before deciding the best one
+"""
+
+
+def domain_cli2query(fromcmdline: str):
     """
     Converts the given domain name as a string into a tuple that will match the format of incoming DNS queries
 
