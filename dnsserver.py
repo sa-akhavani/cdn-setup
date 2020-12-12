@@ -1,17 +1,20 @@
 #!/usr/bin/python3
 import argparse
+import logging
 import socket
+import urllib.request
 
 from dns.rdataclass import RdataClass
 from dns.rdatatype import RdataType
 from dns.rrset import RRset
 import dns.query
 import dns.rdtypes.IN.A
-import random
 
-ADDR = 'cs5700cdnproject.ccs.neu.edu'
-
+ADDR = '192.168.198.131'
 replica_server_list = ['13.231.206.182', '13.239.22.118', '34.248.209.79', '18.231.122.62', '3.101.37.125']
+latency_map = dict()
+
+logging.basicConfig(level=logging.DEBUG)
 
 """
 ---------DNS code
@@ -46,9 +49,31 @@ def domain_cli2query(fromcmdline: str):
     return tuple([x.encode('utf-8') for x in split])
 
 
-def getserveraddr(data: tuple):
+def getserveraddr(src_ip: str):
     """Determines the best server to redirect a user to and returns its IP address"""
-    return random.choice(replica_server_list)
+    if src_ip not in latency_map:
+        # initialize all latencies to -1 so that we can send the client to all of them and get measurements
+        latency_map[src_ip] = [-1] * len(replica_server_list)
+
+    latencies = latency_map[src_ip]
+    minlat = min(latencies)
+    server_ip = replica_server_list[latencies.index(minlat)]
+
+    logging.debug('Redirecting client to server {} which has RTT {}'.format(server_ip, minlat))
+    return server_ip
+
+
+def request_msmt(server_ip, server_port, client_ip):
+    logging.debug('Requesting measurement data from {} for {}'.format(server_ip, client_ip))
+    response = urllib.request.urlopen('http://{}:{}/msmt/{}'.format(server_ip, server_port, client_ip))
+    content = response.read()
+    rtt = float(content)
+
+    logging.debug('Obtained rtt value {}'.format(rtt))
+
+    latencies = latency_map[client_ip]
+    serveridx = replica_server_list.index(server_ip)  # only 5 elements. fine to do linear scan if it reduces code
+    latencies[serveridx] = rtt
 
 
 def run(args: argparse.Namespace):
@@ -57,6 +82,7 @@ def run(args: argparse.Namespace):
 
         args (argparse.Namespace) - command line arguments parsed with argparse
     """
+    logging.debug('DNS Server init')
     sock = socket.socket(socket.AF_INET, socket.SOCK_DGRAM)
     sock.bind((ADDR, args.p))
 
@@ -67,15 +93,19 @@ def run(args: argparse.Namespace):
     if ADDR != 'cs5700cdnproject.ccs.neu.edu':
         print('Warning: We need to bind to cs5700cdnproject.ccs.neu.edu on the final submission')
 
+    logging.debug('DNS Server accepting requests')
     while True:
         data = dns.query.receive_udp(sock)
         msg = data[0]
-        src = data[2]
+        src_ipport = data[2]
+        logging.debug('Incoming request from {}'.format(src_ipport))
 
         for q in msg.question:
             if q.name.labels == domain_match:
+                logging.debug('Valid request for {}'.format(args.n))
+
                 # choose an IP address and formulate a DNS answer containing it
-                server_ip = getserveraddr(data)
+                server_ip = getserveraddr(src_ipport[0])
                 a = dns.rdtypes.IN.A.A(rdclass=RdataClass.IN, rdtype=RdataType.A, address=server_ip)
 
                 # make DNS response
@@ -85,9 +115,10 @@ def run(args: argparse.Namespace):
                 rr.items[a] = None
                 resp.answer.append(rr)
 
-                dns.query.send_udp(sock, resp, src)
+                logging.debug('Redirecting client to {}'.format(server_ip))
+                dns.query.send_udp(sock, resp, src_ipport)
 
-                # TODO send HTTP request for measurement data to replica server
+                request_msmt(server_ip, args.p, src_ipport[0])
 
 
 if __name__ == '__main__':
