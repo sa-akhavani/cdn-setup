@@ -40,6 +40,10 @@ def extractrtt(ssval: str):
     return (str) the extracted rtt value from ssval
     """
     split = ssval.split()
+    if len(split) < 16:
+        logging.debug('measurement failed')
+
+
     rttstr = split[15]  # constant time lookup. should give us something like rtt:0.015/0.007
     return rttstr.split(':')[1].split('/')[0]
 
@@ -50,14 +54,12 @@ def servearticle(name: str):
 
     name (str) the article title being requested
     """
-    # get the output of doing one of these commands and use the rtt field to store measurement data for this client
-    dstout = subprocess.check_output(['ss', '-it', 'dport = :{}'.format(local_port)]).decode('utf-8')
-    srcout = subprocess.check_output(['ss', '-it', 'sport = :{}'.format(local_port)]).decode('utf-8')
+
+    # passively measure RTT from socket statistics
+    ssout = subprocess.check_output(['ss', '-it', 'sport = :{}'.format(local_port)]).decode('utf-8')
 
     print('talking to', request.remote_addr)
-    print('forwarded for', request.headers.get('X-Forwarded-For', request.remote_addr))
-    print('dst', extractrtt(dstout))
-    print('src', extractrtt(srcout))
+    print('src rtt', extractrtt(ssout))
 
     content = cache.get(name)
     if content != -1:

@@ -40,7 +40,9 @@ class Reader:
         """Reads the json file to a list of dicts. All the base64 encoded bodies are decoded and the final list of dicts
         is returned
         """
-        objlist = json.load(self.fp)
+
+        # must do loads() because replica servers run python3.4 :(
+        objlist = json.loads(self.fp.read().decode('utf-8'))
         for obj in objlist:
             obj['body'] = base64.b64decode(obj['body'])
 
