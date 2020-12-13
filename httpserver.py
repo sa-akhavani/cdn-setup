@@ -80,9 +80,11 @@ def servemeasurement(name: str):
     name (str) the IP address of the client whose RTT with this server is being requested
     """
     if name not in latencies:
+        logging.debug('No measurement data for {}. Sleeping for one second'.format(name))
         time.sleep(1.0)
 
     if name not in latencies:
+        logging.debug('Still no measurement data. Returning empty string')
         return ''
 
     return latencies[name]

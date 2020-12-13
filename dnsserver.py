@@ -71,6 +71,7 @@ def request_msmt(server_ip, server_port, client_ip):
     try:
         response = urllib.request.urlopen('http://{}:{}/msmt/{}'.format(server_ip, server_port, client_ip))
         content = response.read()
+        logging.debug('Received message from HTTP server: {}'.format(content))
         rtt = float(content)
     except urllib.error.URLError:
         logging.debug('URLError when requesting measurement'.format(server_ip))
