@@ -1,13 +1,3 @@
 What's left:
- - README for milestone
- - building cache file
- - reading cache from file into replica server
- - measurements on HTTP server (ip tcp_metrics. grep for target ip and get rtt/rttvar values)
- - DNS server requesting measurements and storing them
- - DNS server choosing fastest replica server
  - deploy, run, stopCDN scripts
  - final README
-
-questions for TA/prof:
- - knapsack on articles to maximize hits. good idea or not?
- - should we limit the size of our database of latency data?

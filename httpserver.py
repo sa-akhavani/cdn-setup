@@ -1,6 +1,7 @@
 #!/usr/bin/python3
 import argparse
 import subprocess
+import time
 import urllib.request
 import logging
 
@@ -21,6 +22,7 @@ CACHEFN = 'requested.json'
 
 app = Flask(__name__)
 cache = cache.Cache(cache_memory_limit)
+latencies = dict()
 
 
 def fillcache():
@@ -43,7 +45,6 @@ def extractrtt(ssval: str):
     if len(split) < 16:
         logging.debug('measurement failed')
 
-
     rttstr = split[15]  # constant time lookup. should give us something like rtt:0.015/0.007
     return rttstr.split(':')[1].split('/')[0]
 
@@ -57,9 +58,9 @@ def servearticle(name: str):
 
     # passively measure RTT from socket statistics
     ssout = subprocess.check_output(['ss', '-it', 'sport = :{}'.format(local_port)]).decode('utf-8')
-
-    print('talking to', request.remote_addr)
-    print('src rtt', extractrtt(ssout))
+    rtt = extractrtt(ssout)
+    latencies[request.remote_addr] = rtt
+    logging.debug('RTT measured for {}: {}'.format(request.remote_addr, rtt))
 
     content = cache.get(name)
     if content != -1:
@@ -78,7 +79,13 @@ def servemeasurement(name: str):
 
     name (str) the IP address of the client whose RTT with this server is being requested
     """
-    pass  # TODO
+    if name not in latencies:
+        time.sleep(1.0)
+
+    if name not in latencies:
+        return ''
+
+    return latencies[name]
 
 
 @app.route('/<path:path>')

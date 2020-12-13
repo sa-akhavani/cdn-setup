@@ -3,6 +3,7 @@ import argparse
 import logging
 import socket
 import urllib.request
+import urllib.error
 
 from dns.rdataclass import RdataClass
 from dns.rdatatype import RdataType
@@ -65,15 +66,19 @@ def getserveraddr(src_ip: str):
 
 def request_msmt(server_ip, server_port, client_ip):
     logging.debug('Requesting measurement data from {} for {}'.format(server_ip, client_ip))
-    response = urllib.request.urlopen('http://{}:{}/msmt/{}'.format(server_ip, server_port, client_ip))
-    content = response.read()
-    rtt = float(content)
+    serveridx = replica_server_list.index(server_ip)  # only 5 elements. fine to do linear scan if it reduces code
+
+    try:
+        response = urllib.request.urlopen('http://{}:{}/msmt/{}'.format(server_ip, server_port, client_ip))
+        content = response.read()
+        rtt = float(content)
+    except urllib.error.URLError:
+        logging.debug('URLError when requesting measurement'.format(server_ip))
+        rtt = latency_map[client_ip][serveridx]
 
     logging.debug('Obtained rtt value {}'.format(rtt))
-
-    latencies = latency_map[client_ip]
-    serveridx = replica_server_list.index(server_ip)  # only 5 elements. fine to do linear scan if it reduces code
-    latencies[serveridx] = rtt
+    latency_map[client_ip][serveridx] = rtt
+    logging.debug('New latency set: {}'.format(latency_map[client_ip][serveridx]))
 
 
 def run(args: argparse.Namespace):
