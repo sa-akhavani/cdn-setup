@@ -1,0 +1,14 @@
+#!/usr/bin/python3
+import os
+import sys
+
+import commonCDN
+
+if __name__ == '__main__':
+    args = commonCDN.parse_args(sys.argv)
+
+    os.system('python3 requestcache.py -i torequest.csv -o requested.json')
+
+    for rep in commonCDN.replicalist:
+        os.system('scp -i {} Makefile httpserver httpserver.py cache.py fileifc.py requested.json {}@{}:~'.format(args.i, args.u, rep))
+        os.system('ssh -i {} {}@{} `make`'.format(args.i, args.u, rep))

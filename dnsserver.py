@@ -12,7 +12,8 @@ import dns.query
 import dns.rdtypes.IN.A
 
 ADDR = '192.168.198.131'
-replica_server_list = ['34.238.192.84', '13.231.206.182', '13.239.22.118', '34.248.209.79', '18.231.122.62', '3.101.37.125']
+replica_server_list = ['34.238.192.84', '13.231.206.182', '13.239.22.118',
+                       '34.248.209.79', '18.231.122.62', '3.101.37.125']
 latency_map = dict()
 
 logging.basicConfig(level=logging.DEBUG)
