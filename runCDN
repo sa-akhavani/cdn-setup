@@ -9,4 +9,4 @@ if __name__ == '__main__':
     args = commonCDN.parse_args(sys.argv)
 
     for rep in commonCDN.replicalist:
-        os.system('ssh -i {} {}@{} `nohup ./httpserver -p {} -o {} &; echo $! > {}}`'.format(args.i, args.u, rep, args.p, args.o, PIDFILE))
+        os.system('ssh -i {} {}@{} \'nohup ./httpserver -p {} -o {} > /dev/null 2>&1 & echo $! > {}\''.format(args.i, args.u, rep, args.p, args.o, PIDFILE))

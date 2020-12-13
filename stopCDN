@@ -9,4 +9,4 @@ if __name__ == '__main__':
     args = commonCDN.parse_args(sys.argv)
 
     for rep in commonCDN.replicalist:
-        os.system('ssh -i {} {}@{} $(kill -9 $(cat {}))'.format(args.i, args.u, rep, PIDFILE))
+        os.system('ssh -i {} {}@{} \'kill -9 `cat {}`\''.format(args.i, args.u, rep, PIDFILE))
