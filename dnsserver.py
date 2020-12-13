@@ -12,24 +12,10 @@ import dns.query
 import dns.rdtypes.IN.A
 
 ADDR = '192.168.198.131'
-replica_server_list = ['13.231.206.182', '13.239.22.118', '34.248.209.79', '18.231.122.62', '3.101.37.125']
+replica_server_list = ['34.238.192.84', '13.231.206.182', '13.239.22.118', '34.248.209.79', '18.231.122.62', '3.101.37.125']
 latency_map = dict()
 
 logging.basicConfig(level=logging.DEBUG)
-
-"""
----------DNS code
-receive request
-if src_ip in map:
-    redirect user to server with lowest latency
-else:
-    redirect to random server
-    map src_ip to a list of latencies with all servers' latencies = -1
-send request for measured latency to the server we just directed the client to
-receive that request in another thread and update latency in map
-
-note: all latencies are set to -1 to begin with so that we can measure to all servers before deciding the best one
-"""
 
 
 def domain_cli2query(fromcmdline: str):
@@ -65,17 +51,22 @@ def getserveraddr(src_ip: str):
 
 
 def request_msmt(server_ip, server_port, client_ip):
+    """Requests measurment data from the HTTP server and stores it if it receives any"""
     logging.debug('Requesting measurement data from {} for {}'.format(server_ip, client_ip))
-    serveridx = replica_server_list.index(server_ip)  # only 5 elements. fine to do linear scan if it reduces code
+    serveridx = replica_server_list.index(server_ip)  # only 6 elements. fine to do linear scan if it reduces code
 
     try:
         response = urllib.request.urlopen('http://{}:{}/msmt/{}'.format(server_ip, server_port, client_ip))
         content = response.read()
         logging.debug('Received message from HTTP server: {}'.format(content))
-        rtt = float(content)
     except urllib.error.URLError:
         logging.debug('URLError when requesting measurement'.format(server_ip))
+        content = b''
+
+    if content == b'':
         rtt = latency_map[client_ip][serveridx]
+    else:
+        rtt = float(content)
 
     logging.debug('Obtained rtt value {}'.format(rtt))
     latency_map[client_ip][serveridx] = rtt
