@@ -11,7 +11,6 @@ submissionfiles = [
     'httpserver',
     'dnsserver',
     'cache.py',
-    'commonCDN.py',
     'fileifc.py',
     'requestcache.py',
     'torequest.csv'
