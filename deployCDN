@@ -7,7 +7,7 @@ import commonCDN
 if __name__ == '__main__':
     args = commonCDN.parse_args(sys.argv)
 
-    #os.system('python3 requestcache.py -i torequest.csv -o requested.json')
+    os.system('python3 requestcache.py -i torequest.csv -o requested.json')
 
     for rep in commonCDN.replicalist:
         os.system('scp -i {} httpserver cache.py fileifc.py requested.json {}@{}:~'.format(args.i, args.u, rep))
