@@ -8,5 +8,7 @@ from commonCDN import PIDFILE
 if __name__ == '__main__':
     args = commonCDN.parse_args(sys.argv)
 
+    os.system('ssh -i {} {}@{} \'nohup ./dnsserver -p {} -n {} > /dev/null 2>&1 & echo $! > {}\''.format(args.i, args.u, 'cs5700cdnproject.ccs.neu.edu', args.p, args.n, PIDFILE))
+
     for rep in commonCDN.replicalist:
         os.system('ssh -i {} {}@{} \'nohup ./httpserver -p {} -o {} > /dev/null 2>&1 & echo $! > {}\''.format(args.i, args.u, rep, args.p, args.o, PIDFILE))

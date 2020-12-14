@@ -7,6 +7,8 @@ from commonCDN import PIDFILE
 
 if __name__ == '__main__':
     args = commonCDN.parse_args(sys.argv)
+        
+    os.system('ssh -i {} {}@{} \'kill -9 `cat {}`\''.format(args.i, args.u, 'cs5700cdnproject.ccs.neu.edu', PIDFILE))
 
     for rep in commonCDN.replicalist:
         os.system('ssh -i {} {}@{} \'kill -9 `cat {}`\''.format(args.i, args.u, rep, PIDFILE))
