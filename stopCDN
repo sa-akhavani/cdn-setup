@@ -38,7 +38,7 @@ ssh -i $SSHKEY $USRNAME@cs5700cdnproject.ccs.neu.edu "kill -9 \`cat pid.txt\`"
 # Stopping Replicas
 for repl in ${replicas[@]}; do
     echo Stopping Replica: $repl
-    ssh -i $SSHKEY $USRNAME@$repl "kill -9 `cat pid.txt`"
+    ssh -i $SSHKEY $USRNAME@$repl "kill -9 \`cat pid.txt\`"
 done
 
 echo Stopped Everything!
