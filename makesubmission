@@ -1,0 +1,25 @@
+#!/usr/bin/python
+
+import os
+
+submissionfiles = [
+    'README',
+    'Makefile',
+    'deployCDN',
+    'runCDN',
+    'stopCDN',
+    'httpserver',
+    'dnsserver',
+    'cache.py',
+    'commonCDN.py',
+    'fileifc.py',
+    'requestcache.py',
+    'torequest.csv'
+]
+
+if __name__ == '__main__':
+    os.system('mkdir -p submission')
+    os.system('rm submission/*')
+
+    for f in submissionfiles:
+        os.system('cp {} submission'.format(f))
