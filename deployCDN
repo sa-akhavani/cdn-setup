@@ -1,17 +1,49 @@
-#!/usr/bin/python3
-import os
-import sys
+#!/bin/bash
 
-import commonCDN
+replicas=(ec2-34-238-192-84.compute-1.amazonaws.com
+ec2-13-231-206-182.ap-northeast-1.compute.amazonaws.com
+ec2-13-239-22-118.ap-southeast-2.compute.amazonaws.com
+ec2-34-248-209-79.eu-west-1.compute.amazonaws.com
+ec2-18-231-122-62.sa-east-1.compute.amazonaws.com
+ec2-3-101-37-125.us-west-1.compute.amazonaws.com)
 
-if __name__ == '__main__':
-    args = commonCDN.parse_args(sys.argv)
+# Parsing Input
+POSITIONAL=()
+while [[ $# -gt 0 ]]
+do
+key="$1"
+case $key in
+    -i)
+    SSHKEY="$2"
+    shift # past argument
+    shift # past value
+    ;;
+    -u)
+    USRNAME="$2"
+    shift # past argument
+    shift # past value
+    ;;
+    *)    # unknown option
+    POSITIONAL+=("$1") # save it in an array for later
+    shift # past argument
+    ;;
+esac
+done
 
-    os.system('python3 requestcache.py -i torequest.csv -o requested.json')
+# Cache Prefetch
+echo Prefetching Cache...
+python3 requestcache.py -i torequest.csv -o requested.json
 
-    os.system('scp -i {} dnsserver {}@cs5700cdnproject.ccs.neu.edu:~'.format(args.i, args.u))
-    os.system('ssh -i {} {}@cs5700cdnproject.ccs.neu.edu chmod +x dnsserver'.format(args.i, args.u))
+# Deploying DNS
+echo Deploying DNS...
+scp -i $SSHKEY dnsserver $USRNAME@cs5700cdnproject.ccs.neu.edu:~
+ssh -i $SSHKEY $USRNAME@cs5700cdnproject.ccs.neu.edu chmod +x dnsserver
 
-    for rep in commonCDN.replicalist:
-        os.system('scp -i {} httpserver cache.py fileifc.py requested.json {}@{}:~'.format(args.i, args.u, rep))
-        os.system('ssh -i {} {}@{} chmod +x httpserver'.format(args.i, args.u, rep))
+# Deploying Replicas
+for repl in ${replicas[@]}; do
+    echo Deploying Replica: $repl
+    scp -i $SSHKEY httpserver cache.py fileifc.py requested.json $USRNAME@$repl:~
+    ssh -i $SSHKEY $USRNAME@$repl chmod +x httpserver
+done
+
+echo Deployment Finished!

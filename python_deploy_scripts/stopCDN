@@ -1,0 +1,24 @@
+#!/usr/bin/python3
+import os
+import sys
+
+import commonCDN
+from commonCDN import PIDFILE
+
+if __name__ == '__main__':
+    args = commonCDN.parse_args(sys.argv)
+
+    print('Killing DNS')
+    
+    os.system('ssh -i {} {}@{} \'kill -9 `cat {}`\''.format(args.i, args.u, 'cs5700cdnproject.ccs.neu.edu', PIDFILE))
+    
+    print('Done')
+
+    print('Killing Replicas')
+    for rep in commonCDN.replicalist:
+        print('Killing rep:{}'.format(rep))
+        
+        os.system('ssh -i {} {}@{} \'kill -9 `cat {}`\''.format(args.i, args.u, rep, PIDFILE))
+        
+        print('done')
+    print('stopCDN Finished')
