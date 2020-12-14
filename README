@@ -7,21 +7,33 @@ DNS server.
 
 For our HTTP server, we used the Flask library, since we had read about how easy it was to use; and it was easy! Our
 initial HTTP server, which simply received requests for /wiki/<name> and fetched the article from the origin server, was
-written in under 20 lines of code. We tested our HTTP server by sending it requests via wget.
+written in under 20 lines of code. We tested our HTTP server by sending it requests via wget. We pair-programmed to write
+the HTTP server.
 
 We then added a cache to our server. Our cache is simply a map that rejects additional put() operations once the total
 size of all the values stored in it exceeds a given value (in this case, the  value is 10MB). Since the request
 frequency for each piece of content follows a Zipf distribution, we decided not to implement any sort of cache
-replacement, and rather plan to store the same most popular data at each replica statically.
+replacement, and rather plan to store the same most popular data at each replica statically. We pair-programmed to write
+this part.
 
 In addition, our cache compresses all the data it stored using zlib. This will increase the amount of data we can store
-at each replica server without going over the 10MB quota. Integrating our cache into the HTTP server was trivial. We
-pair-programmed to write the HTTP server.
+at each replica server without going over the 10MB quota. Integrating our cache into the HTTP server was trivial. Ali
+wrote this part of the code.
 
-The last piece of data we implemented for this milestone was an interface for storing our entire cache in a file which
+The last piece of data we implemented for the first milestone was an interface for storing our entire cache in a file which
 can be deployed to each replica server. Our file format is a list of JSON objects, with each object containing a
 wikipedia article title and the zlib-compressed article body encoded in base64. The base64 encoding was necessary to
 stop JSON from encoding the article in unicode, which completely mangled the data upon recovery from the file. Anthony
 wrote this part of the code, and we tested it by requesting /wiki/Main_Page from the origin server, encoding it in the
 JSON file, then reading it back from the file and ensuring that the retrieved message is the same as it was when it
 arrived from the origin server.
+
+After implementing these parts, we implemented a system that maps IPs to nearby replica servers. We discussed the method
+and implementation together and Anthony wrote the code. For each client, we passively measure RTT to all replica servers
+by using socket statistics. Then we redirect the client to the replica that has the least RTT. When a clients asks for an
+IP address, the DNS server communicates with all HTTP servers and asks them to give their RTT to that client, then the DNS
+server chooses the server with the least RTT and sends its IP to the client.
+
+The final part is the deploy scripts, deployCDN copies httpserver, cache, and prefetched cache data to all http servers. It
+also copies dnsserver to the DNS server. runCDN runs the http server in all replicas and also runs the DNS server.
+Finally, stopCDN stops all http servers in all of the servers by killing their process. It also stops the DNS server.
