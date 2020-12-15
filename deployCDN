@@ -30,9 +30,10 @@ case $key in
 esac
 done
 
-# Cache Prefetch
-echo Prefetching Cache...
-python3 requestcache.py -i torequest.csv -o requested.json
+# # Cache Prefetch
+# # We dont do this part cause we don't know the deployment server has python or not.
+# echo Prefetching Cache...
+# python3 requestcache.py -i torequest.csv -o requested.json
 
 # Deploying DNS
 echo Deploying DNS...

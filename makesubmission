@@ -13,7 +13,8 @@ submissionfiles = [
     'cache.py',
     'fileifc.py',
     'requestcache.py',
-    'torequest.csv'
+    'torequest.csv',
+    'requested.json'
 ]
 
 if __name__ == '__main__':
